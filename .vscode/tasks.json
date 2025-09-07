@@ -1,0 +1,25 @@
+{
+    "version": "2.0.0",
+    "tasks": [ 
+        {
+            "label": "quarkus:dev",
+            "type": "shell",
+            "command": "./mvnw quarkus:dev",
+            "options": {
+                "env": {
+                    "SERVICE_NAME_BASE":"/chatPort",
+                    "SWAGGER_ENABLE": "true",
+                    "OPENAPI_ENABLED": "true",
+                    "AMQ_ARTEMIS_URL": "tcp://localhost:61616",
+                    "AMQ_ARTEMIS_USERNAME": "artemis",
+                    "AMQ_ARTEMIS_PASSWORD": "artemis", 
+                }
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        }
+    ]
+}

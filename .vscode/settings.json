@@ -1,0 +1,22 @@
+{
+    "microprofile.tools.validation.unknown.excluded": [
+        "*/mp-rest/providers/*/priority",
+        "mp.openapi.schema.*",
+        "kafka-streams.*",
+        "camel.*",
+        "quarkus.smallrye-openapi.path",
+        "quarkus.artemis.enabled",
+        "quarkus.artemis.*",
+        "quarkus.http.*",
+        "quarkus.datasource.*",
+        "SERVICE_NAME_BASE",
+        "SWAGGER_ENABLE",
+        "OPENAPI_ENABLED",
+        "AMQ_ARTEMIS_URL",
+        "AMQ_ARTEMIS_USERNAME",
+        "AMQ_ARTEMIS_PASSWORD",
+        "AMQ_ARTEMIS_ENABLED",
+        "quarkus.hibernate-orm.*"
+    ],
+    "java.configuration.updateBuildConfiguration": "interactive"
+}

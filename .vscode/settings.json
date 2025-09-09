@@ -16,7 +16,9 @@
         "AMQ_ARTEMIS_USERNAME",
         "AMQ_ARTEMIS_PASSWORD",
         "AMQ_ARTEMIS_ENABLED",
-        "quarkus.hibernate-orm.*"
+        "quarkus.hibernate-orm.*",
+        "openapi.*",
+        "api.*"
     ],
     "java.configuration.updateBuildConfiguration": "interactive"
 }

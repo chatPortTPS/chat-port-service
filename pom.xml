@@ -205,6 +205,7 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
+  
 
   <!-- Repos (Red Hat + tu Nexus) -->
   <repositories>

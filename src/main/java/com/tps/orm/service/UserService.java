@@ -1,5 +1,12 @@
 package com.tps.orm.service;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import com.tps.orm.dto.PageRequest;
+import com.tps.orm.dto.PagedResponse;
 import com.tps.orm.entity.User;
 import com.tps.orm.repository.UserRepository;
 
@@ -7,11 +14,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import services.operacion.user.UserResponse;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class UserService {
@@ -51,11 +53,7 @@ public class UserService {
 
         userRepository.persist(user);
 
-        UserResponse userResponse = new UserResponse();
-        userResponse.setUsername(user.getUsername());
-        userResponse.setEmail(user.getEmail());
-        userResponse.setStatus(user.getStatus());
-        userResponse.setCreatedAt(user.getCreatedAt().toString());
+        UserResponse userResponse = convertToUserResponse(user);
       
         return userResponse;
     }
@@ -94,9 +92,22 @@ public class UserService {
     /**
      * Buscar usuario por ID
      */
+    @Transactional
     public Optional<User> findById(Long id) {
         User user = userRepository.findById(id);
         return Optional.ofNullable(user);
+    }
+
+    /**
+     * Obtener usuario por ID y mapear a UserResponse
+     */
+    @Transactional
+    public UserResponse getUserById(Long id) {
+        User user = userRepository.findById(id);
+        if (user == null) {
+            throw new IllegalArgumentException("User not found with id: " + id);
+        }
+        return convertToUserResponse(user);
     }
 
     /**
@@ -119,23 +130,7 @@ public class UserService {
     public List<User> findActiveUsers() {
         return userRepository.findActiveUsers();
     }
-
-    /**
-     * Obtener todos los usuarios
-     */
-    @Transactional
-    public List<UserResponse> findAllUsers() {
-        List<User> lista = userRepository.listAll();
-        return lista.stream().map(user -> {
-            UserResponse response = new UserResponse();
-            response.setUsername(user.getUsername());
-            response.setEmail(user.getEmail());
-            response.setStatus(user.getStatus());
-            response.setCreatedAt(user.getCreatedAt().toString());
-            return response;
-        }).collect(Collectors.toList());
-    }
-
+  
     /**
      * Activar usuario
      */
@@ -163,6 +158,94 @@ public class UserService {
             return true;
         }
         return false;
+    }
+
+ 
+
+    /**
+     * Obtener total de usuarios
+     */
+    @Transactional
+    public long getTotalUsers() {
+        return userRepository.countAllUsers();
+    }
+
+    /**
+     * Obtener total de usuarios activos
+     */
+    @Transactional
+    public long getActiveUsers() {
+        return userRepository.countActiveUsers();
+    }
+
+    /**
+     * Obtener total de usuarios inactivos
+     */
+    @Transactional
+    public long getInactiveUsers() {
+        return userRepository.countInactiveUsers();
+    }
+
+    /**
+     * Obtener todos los usuarios con paginado
+     */
+    @Transactional
+    public PagedResponse<UserResponse> findAllUsersPaged(PageRequest pageRequest) {
+        List<User> users = userRepository.findAllPaged(pageRequest);
+        long totalElements = userRepository.countAllUsers();
+        
+        List<UserResponse> userResponses = users.stream()
+                .map(this::convertToUserResponse)
+                .collect(Collectors.toList());
+        
+        return PagedResponse.of(userResponses, pageRequest.getPage(), pageRequest.getSize(), totalElements);
+    }
+
+    /**
+     * Obtener usuarios activos con paginado
+     */
+    @Transactional
+    public PagedResponse<UserResponse> findActiveUsersPaged(PageRequest pageRequest) {
+        List<User> users = userRepository.findActiveUsersPaged(pageRequest);
+        long totalElements = userRepository.countActiveUsers();
+        
+        List<UserResponse> userResponses = users.stream()
+                .map(this::convertToUserResponse)
+                .collect(Collectors.toList());
+        
+        return PagedResponse.of(userResponses, pageRequest.getPage(), pageRequest.getSize(), totalElements);
+    }
+
+    /**
+     * Buscar usuarios por filtro con paginado
+     */
+    @Transactional
+    public PagedResponse<UserResponse> findUsersByFilterPaged(String filter, PageRequest pageRequest) {
+        if (filter == null || filter.trim().isEmpty()) {
+            return findAllUsersPaged(pageRequest);
+        }
+        
+        List<User> users = userRepository.findByFilterPaged(filter, pageRequest);
+        long totalElements = userRepository.countByFilter(filter);
+        
+        List<UserResponse> userResponses = users.stream()
+                .map(this::convertToUserResponse)
+                .collect(Collectors.toList());
+        
+        return PagedResponse.of(userResponses, pageRequest.getPage(), pageRequest.getSize(), totalElements);
+    }
+
+    /**
+     * Convertir User a UserResponse (método helper)
+     */
+    private UserResponse convertToUserResponse(User user) {
+        UserResponse response = new UserResponse();
+        response.setId(user.getId());
+        response.setUsername(user.getUsername());
+        response.setEmail(user.getEmail());
+        response.setStatus(user.getStatus());
+        response.setCreatedAt(user.getCreatedAt().toString());
+        return response;
     }
  
 }

@@ -10,6 +10,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @NoArgsConstructor
 public class UserResponse implements Serializable  {
 
+    @JsonProperty("id")
+    private Long id;
+
     @JsonProperty("username")
     private String username;
     

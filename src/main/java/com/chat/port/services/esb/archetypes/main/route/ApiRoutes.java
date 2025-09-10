@@ -1,18 +1,11 @@
 package com.chat.port.services.esb.archetypes.main.route;
-
-import java.util.ArrayList;
-
+ 
 import org.apache.camel.builder.RouteBuilder; 
-import org.apache.camel.model.rest.RestBindingMode;
-import org.apache.camel.model.rest.RestParamType;
+import org.apache.camel.model.rest.RestBindingMode; 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import services.operacion.user.GetUserRoute;
-import com.chat.port.response.Response;
-
-import com.chat.port.response.Response;
+import jakarta.inject.Inject; 
+import com.chat.port.response.Response; 
 
 
 @ApplicationScoped

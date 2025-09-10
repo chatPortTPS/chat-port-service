@@ -128,6 +128,12 @@
       <groupId>org.apache.camel.quarkus</groupId>
       <artifactId>camel-quarkus-platform-http</artifactId>
     </dependency>
+    
+    <!-- HTTP client for external API calls -->
+    <dependency>
+      <groupId>org.apache.camel.quarkus</groupId>
+      <artifactId>camel-quarkus-http</artifactId>
+    </dependency>
 
     <dependency>
 		    <groupId>org.apache.camel.quarkus</groupId>

@@ -21,10 +21,10 @@ public class PagedResponse<T> {
     @JsonProperty("size")
     private int size;
     
-    @JsonProperty("totalElements")
+    @JsonProperty("total_elements")
     private long totalElements;
     
-    @JsonProperty("totalPages")
+    @JsonProperty("total_pages")
     private int totalPages;
     
     @JsonProperty("first")
@@ -33,7 +33,7 @@ public class PagedResponse<T> {
     @JsonProperty("last")
     private boolean last;
     
-    @JsonProperty("numberOfElements")
+    @JsonProperty("number_of_elements")
     private int numberOfElements;
     
     @JsonProperty("empty")

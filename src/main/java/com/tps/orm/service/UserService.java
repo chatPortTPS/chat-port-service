@@ -113,8 +113,23 @@ public class UserService {
     /**
      * Buscar usuario por username
      */
+    @Transactional
     public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
+    }
+
+    /**
+     * Obtener usuario por username y mapear a UserResponse
+     */
+    @Transactional
+    public UserResponse getUserByUsername(String username) {
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado: " + username));
+
+        if(!user.getStatus()){
+            throw new IllegalArgumentException("Usuario inactivo");
+        }
+
+        return convertToUserResponse(user);
     }
 
     /**
@@ -160,6 +175,20 @@ public class UserService {
         return false;
     }
 
+    /**
+     * Marcar ingreso de usuario (actualizar lastAccessedAt)
+     */
+    @Transactional
+    public void incomeUser(String username) {
+        Optional<User> userOpt = userRepository.findByUsername(username);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            user.setAccessedAt(LocalDateTime.now());
+            userRepository.persist(user);
+        } else {
+            throw new IllegalArgumentException("Usuario no encontrado: " + username);
+        }
+    }
  
 
     /**

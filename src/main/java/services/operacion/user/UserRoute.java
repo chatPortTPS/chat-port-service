@@ -20,6 +20,18 @@ public class UserRoute extends RouteBuilder {
             .get("/dashboard")
                 .to("direct:dashboard")
 
+            
+            .get("/isAdmin")
+                .consumes("application/x-www-form-urlencoded")
+                .produces("application/json")
+                .param()
+                    .name("username")
+                    .type(RestParamType.query)
+                    .dataType("string")
+                    .required(true)
+                .endParam()
+                .to("direct:isAdmin")
+
              
             // POST /user
             .post()
@@ -66,7 +78,18 @@ public class UserRoute extends RouteBuilder {
                 .endParam()
                 .to("direct:deleteUser")
 
-
+            
+            .post("/income")
+                .consumes("application/x-www-form-urlencoded")
+                .produces("application/json")
+                .param()
+                    .name("username")
+                    .type(RestParamType.query)
+                    .dataType("string")
+                    .required(true)
+                .endParam()
+                .to("direct:incomeUser")
+ 
 
             // GET /user
             .get()

@@ -3,11 +3,18 @@ package services.operacion.user;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.camel.builder.RouteBuilder; 
+import org.apache.camel.builder.RouteBuilder;
+
+import com.tps.orm.service.UserService;
+
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class GetUserRoute extends RouteBuilder {
+
+    @Inject
+    UserService userService;
 
     @Override
     public void configure() throws Exception {
@@ -16,10 +23,7 @@ public class GetUserRoute extends RouteBuilder {
             .doTry()
                 .process(exchange -> {
                     // Lógica del servicio de usuario
-                    List<UserResponse> lista = new ArrayList<>();
-                    lista.add(new UserResponse("Usuario 1", "usuario1@example.com"));
-                    lista.add(new UserResponse("Usuario 2", "usuario2@example.com"));
-
+                    List<UserResponse> lista = userService.findAllUsers();
                     exchange.getMessage().setBody(lista);
                 })
                 .to("direct:success")

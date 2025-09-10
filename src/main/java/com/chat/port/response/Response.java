@@ -2,6 +2,7 @@ package com.chat.port.response;
 
 import lombok.Data;
 import java.io.Serializable;
+import java.util.ArrayList;
 
 @Data
 public class Response implements Serializable {
@@ -22,8 +23,7 @@ public class Response implements Serializable {
  
     public void ok(Object body) {
         this.message = "Proceso exitoso";
-        this.body = body;
-       
+        this.body = body; 
     }
 
     public void ok(String message, Object body) {
@@ -33,7 +33,7 @@ public class Response implements Serializable {
 
     public void error(String message) {
         this.message = message;
-        this.body = null; 
+        this.body = new ArrayList<>(); 
     }
 
 }

@@ -34,6 +34,7 @@ public class CreateUserRoute extends RouteBuilder {
                     List<UserResponse> users = new ArrayList<>();
                     users.add(user);
 
+                    exchange.getMessage().setHeader("message", "Usuario creado exitosamente");
                     exchange.getMessage().setBody(users);
 
                 })

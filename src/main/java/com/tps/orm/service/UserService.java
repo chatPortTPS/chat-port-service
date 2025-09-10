@@ -2,6 +2,7 @@ package com.tps.orm.service;
 
 import com.tps.orm.entity.User;
 import com.tps.orm.repository.UserRepository;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -10,6 +11,7 @@ import services.operacion.user.UserResponse;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class UserService {
@@ -23,12 +25,21 @@ public class UserService {
     @Transactional
     public UserResponse createUser(String username, String email) {
         // Validar que no exista el usuario
+        if (username == null || username.isEmpty() || email == null || email.isEmpty()) {
+            throw new IllegalArgumentException("El username y el email no deben estar vacíos");
+        }
+
         if (userRepository.existsByUsername(username)) {
-            throw new IllegalArgumentException("Username already exists: " + username);
+            throw new IllegalArgumentException("El usuario: " + username + " ya existe.");
         }
         
         if (userRepository.existsByEmail(email)) {
-            throw new IllegalArgumentException("Email already exists: " + email);
+            throw new IllegalArgumentException("El email: " + email + " ya existe.");
+        }
+
+        // Validar formato de email
+        if (!isValidEmail(email)) {
+            throw new IllegalArgumentException("El email no tiene un formato válido");
         }
 
         User user = new User();
@@ -40,14 +51,22 @@ public class UserService {
 
         userRepository.persist(user);
 
-
         UserResponse userResponse = new UserResponse();
         userResponse.setUsername(user.getUsername());
         userResponse.setEmail(user.getEmail());
         userResponse.setStatus(user.getStatus());
-        userResponse.setCreatedAt(user.getCreatedAt());
-
+        userResponse.setCreatedAt(user.getCreatedAt().toString());
+      
         return userResponse;
+    }
+
+    private boolean isValidEmail(String email) {
+        if (email == null || email.isEmpty()) {
+            return false;
+        }
+        
+        String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
+        return email.matches(emailRegex);
     }
 
     /**
@@ -104,8 +123,17 @@ public class UserService {
     /**
      * Obtener todos los usuarios
      */
-    public List<User> findAllUsers() {
-        return userRepository.listAll();
+    @Transactional
+    public List<UserResponse> findAllUsers() {
+        List<User> lista = userRepository.listAll();
+        return lista.stream().map(user -> {
+            UserResponse response = new UserResponse();
+            response.setUsername(user.getUsername());
+            response.setEmail(user.getEmail());
+            response.setStatus(user.getStatus());
+            response.setCreatedAt(user.getCreatedAt().toString());
+            return response;
+        }).collect(Collectors.toList());
     }
 
     /**

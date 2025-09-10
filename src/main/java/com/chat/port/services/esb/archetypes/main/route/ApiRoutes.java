@@ -1,10 +1,14 @@
 package com.chat.port.services.esb.archetypes.main.route;
 
+import java.util.ArrayList;
+
 import org.apache.camel.builder.RouteBuilder; 
 import org.apache.camel.model.rest.RestBindingMode;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+
 import com.chat.port.response.Response;
 
 
@@ -42,20 +46,31 @@ public class ApiRoutes extends RouteBuilder {
     }
    
     
-
-    from("direct:success")
-        .process(securityHeadersProcessor)
+    from("direct:success") 
         .process(exchange -> {
             Response response = new Response();
-            response.ok(exchange.getMessage().getBody());
+
+            if(exchange.getMessage().getHeader("message", String.class) == null) {
+              response.ok(exchange.getMessage().getBody());
+            }else{
+              response.ok(exchange.getMessage().getHeader("message", String.class), exchange.getMessage().getBody());
+            }
+            
             exchange.getMessage().setBody(response);
         })
+        .process(securityHeadersProcessor)
         .setHeader("Content-Type", constant("application/json"))
         .setHeader("X-Status-Code", constant(200)) 
         .log("Respuesta exitosa: ${exchangeProperty.message}");
 
 
-    from("direct:error")
+    from("direct:error")  
+        .setBody(exceptionMessage())
+        .process(exchange -> {
+            Response response = new Response();
+            response.error(exchange.getMessage().getBody(String.class)); 
+            exchange.getMessage().setBody(response);
+        })
         .process(securityHeadersProcessor)
         .setHeader("Content-Type", constant("application/json"))
         .setHeader("X-Status-Code", constant(500))

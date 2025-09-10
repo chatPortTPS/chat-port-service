@@ -1,6 +1,8 @@
 package services.operacion.user;
 
-import org.apache.camel.builder.RouteBuilder; 
+import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.model.rest.RestParamType;
+
 import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
@@ -15,12 +17,25 @@ public class UserRoute extends RouteBuilder {
             .produces("application/json")
 
             .post()
-                .type(String.class)
-                .to("direct:creteUser")
+                .consumes("application/x-www-form-urlencoded")
+                .produces("application/json")
+                .param()
+                    .name("username")
+                    .type(RestParamType.query)
+                    .dataType("string")
+                    .required(true)
+                .endParam()
+                .param()
+                    .name("email")
+                    .type(RestParamType.query)
+                    .dataType("string")
+                    .required(true)
+                .endParam()
+                .to("direct:createUser")
 
             // GET /user
             .get()
-                .to("direct:user");
+                .to("direct:getUsers");
  
    
     }

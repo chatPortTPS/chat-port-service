@@ -5,6 +5,8 @@ import org.apache.camel.model.rest.RestBindingMode;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import com.chat.port.response.Response;
+
 
 @ApplicationScoped
 public class ApiRoutes extends RouteBuilder {
@@ -43,6 +45,11 @@ public class ApiRoutes extends RouteBuilder {
 
     from("direct:success")
         .process(securityHeadersProcessor)
+        .process(exchange -> {
+            Response response = new Response();
+            response.ok(exchange.getMessage().getBody());
+            exchange.getMessage().setBody(response);
+        })
         .setHeader("Content-Type", constant("application/json"))
         .setHeader("X-Status-Code", constant(200)) 
         .log("Respuesta exitosa: ${exchangeProperty.message}");

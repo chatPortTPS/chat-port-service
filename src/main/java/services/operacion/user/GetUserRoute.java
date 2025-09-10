@@ -12,16 +12,15 @@ public class GetUserRoute extends RouteBuilder {
     @Override
     public void configure() throws Exception {
         
-        from("direct:user")
+        from("direct:getUsers")
             .doTry()
                 .process(exchange -> {
                     // Lógica del servicio de usuario
-                    List<String> lista = new ArrayList<>();
-                    lista.add("Usuario 1");
-                    lista.add("Usuario 2"); 
- 
+                    List<UserResponse> lista = new ArrayList<>();
+                    lista.add(new UserResponse("Usuario 1", "usuario1@example.com"));
+                    lista.add(new UserResponse("Usuario 2", "usuario2@example.com"));
+
                     exchange.getMessage().setBody(lista);
-                    exchange.setProperty("message", "Operación exitosa customizada");
                 })
                 .to("direct:success")
             .doCatch(Exception.class)

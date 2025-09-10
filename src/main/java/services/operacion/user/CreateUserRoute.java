@@ -3,34 +3,43 @@ package services.operacion.user;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder; 
+
+import com.tps.orm.service.UserService;
+
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 @ApplicationScoped
 public class CreateUserRoute extends RouteBuilder {
 
+    @Inject
+    UserService userService;
+
     @Override
     public void configure() throws Exception {
         
-
-        from("direct:creteUser")
+        from("direct:createUser")
             .doTry()
+                .log(LoggingLevel.ERROR, "Creando usuario: ${header.username} con el email: ${header.email}")
                 .process(exchange -> {
                     // Lógica para crear un usuario
-                    String rutCliente = exchange.getIn().getBody(String.class);
-                    List<String> lista = new ArrayList<>();
-                    lista.add(rutCliente); 
                     
-                    exchange.getMessage().setBody(lista);
-                    exchange.setProperty("message", "Usuario creado exitosamente");
+                    String username = exchange.getIn().getHeader("username", String.class);
+                    String email = exchange.getIn().getHeader("email", String.class);
+                    
+                    UserResponse user = userService.createUser(username, email);
+
+                    List<UserResponse> users = new ArrayList<>();
+                    users.add(user);
+
+                    exchange.getMessage().setBody(users);
+
                 })
                 .to("direct:success")
             .doCatch(Exception.class)
-                .process(exchange -> {
-                    // Manejo de excepciones
-                    List<String> lista = new ArrayList<>();
-                    exchange.getMessage().setBody(lista);
-                })
+                .log(LoggingLevel.ERROR, "Error al crear usuario: ${exception.message}")
                 .to("direct:error")
             .endDoTry()
         .end();

@@ -10,7 +10,7 @@ public class AreaRoute extends RouteBuilder {
     public void configure() throws Exception {
        
         rest("/area")
-            .description("Servicio de área")
+            .description("Servicio que obtiene todas las áreas de la organización desde BUK API")
             .consumes("application/json")
             .produces("application/json")
         

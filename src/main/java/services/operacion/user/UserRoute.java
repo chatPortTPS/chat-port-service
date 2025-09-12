@@ -12,7 +12,7 @@ public class UserRoute extends RouteBuilder {
     public void configure() throws Exception {
         // Definición de un endpoint REST
         rest("/user")
-            .description("Servicio de usuario")
+            .description("Servicio para usuario administrativo del sistema")
             .consumes("application/json")
             .produces("application/json")
 
@@ -22,7 +22,7 @@ public class UserRoute extends RouteBuilder {
 
             
             .get("/isAdmin")
-                .consumes("application/x-www-form-urlencoded")
+                .consumes("application/json")
                 .produces("application/json")
                 .param()
                     .name("username")
@@ -35,7 +35,7 @@ public class UserRoute extends RouteBuilder {
              
             // POST /user
             .post()
-                .consumes("application/x-www-form-urlencoded")
+                .consumes("application/json")
                 .produces("application/json")
                 .param()
                     .name("username")
@@ -55,7 +55,7 @@ public class UserRoute extends RouteBuilder {
 
             // POST /user/desactivate
             .post("/desactivate")
-                .consumes("application/x-www-form-urlencoded")
+                .consumes("application/json")
                 .produces("application/json")
                 .param()
                     .name("id")
@@ -68,7 +68,7 @@ public class UserRoute extends RouteBuilder {
 
             // DELETE /user
             .delete()
-                .consumes("application/x-www-form-urlencoded")
+                .consumes("application/json")
                 .produces("application/json")
                 .param()
                     .name("id")
@@ -80,7 +80,7 @@ public class UserRoute extends RouteBuilder {
 
             
             .post("/income")
-                .consumes("application/x-www-form-urlencoded")
+                .consumes("application/json")
                 .produces("application/json")
                 .param()
                     .name("username")
@@ -118,7 +118,7 @@ public class UserRoute extends RouteBuilder {
                 .param().name("filter")
                     .type(RestParamType.query)
                     .required(false)
-                    .description("Filtro de búsqueda")
+                    .description("Filtro de búsqueda por el username o email")
                     .endParam()
                 .to("direct:getUsers");
  

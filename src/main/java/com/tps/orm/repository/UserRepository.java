@@ -131,7 +131,7 @@ public class UserRepository implements PanacheRepository<User> {
      */
     public List<User> findByFilterPaged(String filter, PageRequest pageRequest) {
         Page page = Page.of(pageRequest.getPage(), pageRequest.getSize());
-        String query = "upper(username) like upper(?1) or upper(fullName) like upper(?1) or upper(email) like upper(?1)";
+        String query = "upper(username) like upper(?1) or upper(email) like upper(?1)";
         String searchParam = "%" + filter + "%";
         
         if (pageRequest.isValidSort()) {
@@ -148,7 +148,7 @@ public class UserRepository implements PanacheRepository<User> {
      * Contar usuarios por filtro
      */
     public long countByFilter(String filter) {
-        String query = "upper(username) like upper(?1) or upper(fullName) like upper(?1) or upper(email) like upper(?1)";
+        String query = "upper(username) like upper(?1) or upper(email) like upper(?1)";
         String searchParam = "%" + filter + "%";
         return count(query, searchParam);
     }

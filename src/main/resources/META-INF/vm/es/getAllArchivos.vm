@@ -1,0 +1,19 @@
+{
+  "size": 0,
+  "aggs": {
+    "distinct_titles": {
+      "terms": {
+        "field": "title.keyword",
+        "size": 1000
+      },
+      "aggs": {
+        "latest_doc": {
+          "top_hits": {
+            "size": 1,
+            "_source": ["doc_id", "title", "areas", "fecha", "metadata"]
+          }
+        }
+      }
+    }
+  }
+}

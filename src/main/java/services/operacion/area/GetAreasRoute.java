@@ -66,6 +66,7 @@ public class GetAreasRoute extends RouteBuilder {
         from("direct:getAreas")
             .doTry()
                 .log("Iniciando obtención de áreas desde BUK API")
+                .log(LoggingLevel.ERROR, "Llamando a BUK API en URL: https://" + bukURL + " - la key es: " + bukApiKey)
                 .setHeader("Content-Type", constant("application/json"))
                 .setHeader("auth_token", constant(bukApiKey))
                 // Primera llamada para obtener paginación 
@@ -165,7 +166,7 @@ public class GetAreasRoute extends RouteBuilder {
                 }
             })
             .log(LoggingLevel.ERROR, "Total de áreas únicas después de eliminar duplicados: ${body}")
-            .setHeader("message", simple("${body} áreas obtenidas exitosamente"))
+            .setHeader("message", simple("${body.size} áreas obtenidas exitosamente"))
             .to("direct:success");
 
         // Ruta auxiliar para procesar páginas adicionales

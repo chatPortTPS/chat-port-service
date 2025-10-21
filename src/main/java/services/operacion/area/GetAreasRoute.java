@@ -1,20 +1,23 @@
 package services.operacion.area;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.LoggingLevel;
-import org.apache.camel.Processor;
-import org.apache.camel.AggregationStrategy;
-import org.apache.camel.Exchange;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
-import services.operacion.area.dto.AreaResponse;
-import services.operacion.area.dto.BukApiResponse;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.List;
+import java.text.Normalizer;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.text.Normalizer;
+
+import org.apache.camel.AggregationStrategy;
+import org.apache.camel.Exchange;
+import org.apache.camel.LoggingLevel;
+import org.apache.camel.Processor;
+import org.apache.camel.builder.RouteBuilder;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import services.operacion.area.dto.AreaResponse;
+import services.operacion.area.dto.BukApiResponse;
 
 @ApplicationScoped
 public class GetAreasRoute extends RouteBuilder {
@@ -122,7 +125,7 @@ public class GetAreasRoute extends RouteBuilder {
                     .log("Solo una página encontrada, usando datos de primera página")
                     // El body ya contiene las áreas de la primera página
             .end()
-            .log(LoggingLevel.ERROR, "Total de áreas children obtenidas: ${body.size}")
+            .log(LoggingLevel.ERROR, "Total de áreas children obtenidas: ${body}")
             .process(new Processor() {
                 @Override
                 public void process(Exchange exchange) throws Exception {
@@ -161,8 +164,8 @@ public class GetAreasRoute extends RouteBuilder {
                         .replaceAll("\\p{M}", ""); // Elimina marcas diacríticas (tildes, acentos)
                 }
             })
-            .log(LoggingLevel.ERROR, "Total de áreas únicas después de eliminar duplicados: ${body.size}")
-            .setHeader("message", simple("${body.size} áreas obtenidas exitosamente"))
+            .log(LoggingLevel.ERROR, "Total de áreas únicas después de eliminar duplicados: ${body}")
+            .setHeader("message", simple("${body} áreas obtenidas exitosamente"))
             .to("direct:success");
 
         // Ruta auxiliar para procesar páginas adicionales

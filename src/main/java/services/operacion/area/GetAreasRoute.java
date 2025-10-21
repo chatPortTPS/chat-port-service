@@ -68,6 +68,7 @@ public class GetAreasRoute extends RouteBuilder {
                 .log("Iniciando obtención de áreas desde BUK API")
                 .log(LoggingLevel.ERROR, "Llamando a BUK API en URL: https://" + bukURL + " - la key es: " + bukApiKey)
                 .setHeader("Content-Type", constant("application/json"))
+                .setHeader(Exchange.HTTP_METHOD, constant("GET"))
                 .setHeader("auth_token", constant(bukApiKey))
                 // Primera llamada para obtener paginación 
                 .toD("https://" + bukURL + "&bridgeEndpoint=true")

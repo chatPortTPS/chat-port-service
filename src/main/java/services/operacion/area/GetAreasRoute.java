@@ -70,6 +70,7 @@ public class GetAreasRoute extends RouteBuilder {
                 .setHeader("Content-Type", constant("application/json"))
                 .setHeader(Exchange.HTTP_METHOD, constant("GET"))
                 .setHeader("auth_token", constant(bukApiKey))
+                .setHeader("CamelHttpThrowExceptionOnFailure", constant(true))
                 // Primera llamada para obtener paginación 
                 .toD("https://" + bukURL + "&bridgeEndpoint=true")
                 .log(LoggingLevel.DEBUG, "Respuesta primera página obtenida")
@@ -115,8 +116,15 @@ public class GetAreasRoute extends RouteBuilder {
                             .collect(Collectors.toList());
                     }
                 })
-            .doCatch(Exception.class) 
-                .to("direct:error")
+            .doCatch(Exception.class)
+                .log(LoggingLevel.ERROR, "Error al obtener áreas desde BUK API: ${exception.message}")
+                .process(exchange -> {
+                    Exception cause = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
+                    log.error("Error completo: ", cause);
+                    exchange.getIn().setBody(new ArrayList<AreaResponse>());
+                    exchange.getIn().setHeader("message", "Error al obtener áreas: " + cause.getMessage());
+                })
+                .stop()
             .end()
             // Verificar si hay páginas adicionales (fuera del try-catch)
             .choice()
@@ -210,6 +218,7 @@ public class GetAreasRoute extends RouteBuilder {
         from("direct:fetchAdditionalPage")
             .setHeader("Content-Type", constant("application/json"))
             .setHeader("auth_token", constant(bukApiKey))
+            .setHeader("CamelHttpThrowExceptionOnFailure", constant(true))
             .toD("${body}")
             .process(new Processor() {
                 @Override

@@ -49,6 +49,7 @@ public class Agent extends PanacheEntityBase {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @NotBlank(message = "User creator cannot be blank")
     @Size(max = 255, message = "User cannot exceed 255 characters")
     @Column(name = "created_by", nullable = false, length = 255)
     private String userCreate;
@@ -361,7 +362,9 @@ public class Agent extends PanacheEntityBase {
     public void setPosition(AgentPosition position) {
         this.position = position;
         this.updatedAt = LocalDateTime.now();
-        this.persist();
+        if (this.isPersistent()) {
+            this.persist();
+        }
     }
     
     /**
@@ -432,7 +435,9 @@ public class Agent extends PanacheEntityBase {
     public void setType(AgentType type) {
         this.type = type;
         this.updatedAt = LocalDateTime.now();
-        this.persist();
+        if (this.isPersistent()) {
+            this.persist();
+        }
     }
     
     /**

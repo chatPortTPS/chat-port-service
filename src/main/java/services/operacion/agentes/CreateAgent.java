@@ -32,8 +32,7 @@ public class CreateAgent extends RouteBuilder {
                     // Extraer parámetros query del exchange
                     String name = exchange.getIn().getHeader("name", String.class);
                     String description = exchange.getIn().getHeader("description", String.class);
-                    String prompt = exchange.getIn().getHeader("prompt", String.class);
-                    String status = exchange.getIn().getHeader("status", String.class);
+                    String prompt = exchange.getIn().getHeader("prompt", String.class); 
                     String theme = exchange.getIn().getHeader("theme", String.class);
                     String position = exchange.getIn().getHeader("position", String.class);
                     String website = exchange.getIn().getHeader("website", String.class);
@@ -47,15 +46,7 @@ public class CreateAgent extends RouteBuilder {
                     request.setPrompt(prompt);
                     request.setWebsite(website);
                     request.setUserCreate(userCreate);
-                    
-                    // Convertir strings a enums si no son null o vacíos
-                    if (status != null && !status.trim().isEmpty()) {
-                        try {
-                            request.setStatus(AgentStatus.valueOf(status.trim().toUpperCase()));
-                        } catch (IllegalArgumentException e) {
-                            throw new IllegalArgumentException("Valor de estado inválido: " + status + ". Valores válidos son: " + java.util.Arrays.toString(AgentStatus.values()));
-                        }
-                    }
+                    request.setStatus(AgentStatus.DESARROLLO);
                     
                     if (theme != null && !theme.trim().isEmpty()) {
                         try {

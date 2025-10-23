@@ -7,7 +7,9 @@ import com.tps.orm.entity.AgentPosition;
 import com.tps.orm.entity.AgentStatus;
 import com.tps.orm.entity.AgentTheme;
 import com.tps.orm.entity.AgentType;
+import com.tps.orm.entity.AreaAgente;
 import com.tps.orm.repository.AgentRepository;
+import com.tps.orm.repository.AreaAgenteRepository;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -20,6 +22,9 @@ public class AgentService {
 
     @Inject
     AgentRepository agentRepository;
+
+    @Inject
+    AreaAgenteRepository areaAgenteRepository;
 
     @Transactional
     public AgentResponse createAgent(AgentRequest request) {
@@ -54,5 +59,158 @@ public class AgentService {
         return agents.stream().map(AgentResponse::fromEntity).toList();
     }
     
+    @Transactional
+    public void vincularAreaAlAgente(Long agentId, String areaPublicId) {
+        
+        Agent agent = agentRepository.findById(agentId);
+        if (agent == null) {
+            throw new IllegalArgumentException("Agente no encontrado con identificador proporcionado: " + agentId);
+        }
+
+        if (areaPublicId == null || areaPublicId.trim().isEmpty()) {
+            throw new IllegalArgumentException("El área es obligatoria");
+        }
+
+        AreaAgente existingAreaAgente = areaAgenteRepository.findByAgentIdAndAreaPublicId(agentId, areaPublicId);
+
+        if (existingAreaAgente != null) {
+            throw new IllegalArgumentException("El área ya está vinculada al agente");
+        }
+
+        AreaAgente areaAgente = new AreaAgente();
+        areaAgente.setPublicId(areaPublicId);
+        areaAgente.setAgent(agent);
+
+        areaAgenteRepository.persist(areaAgente);
+
+    }
+
+    @Transactional
+    public boolean deleteAgentById(Long agentId) {
+        Agent agent = agentRepository.findById(agentId);
+
+        if (agent == null) {
+            throw new IllegalArgumentException("Agente no encontrado con ID: " + agentId);
+        }
+
+        List<AreaAgente> areaAgentes = areaAgenteRepository.findByAgentId(agentId);
+
+        for (AreaAgente areaAgente : areaAgentes) {
+            areaAgenteRepository.delete(areaAgente);
+        }
+
+        agentRepository.delete(agent);
+        return true;
+    }
+
+
+    @Transactional
+    public List<AgentResponse> getAgentByPublicId(String publicId) {
+         
+        List<Agent> agents = agentRepository.findByPublicId(publicId);
+
+        if (agents.isEmpty()) {
+            throw new IllegalArgumentException("Agente no encontrado con uuid: " + publicId);
+        }   
+
+        Agent agent = agents.get(0);
+
+        List<String> vinculos = new java.util.ArrayList<>();
+
+        if (agent.getType().equals(AgentType.AREAS)) {
+            List<AreaAgente> areas = areaAgenteRepository.findByAgentId(agent.getId());
+            vinculos = areas.stream().map(AreaAgente::getPublicId).toList(); 
+        }
+
+        return List.of(AgentResponse.fromEntity(agent, vinculos));
+
+    }
+
+
+    @Transactional
+    public AgentResponse updateAgent(Long agentId, String name, String description, String prompt, String theme, String position,
+            String website) {
+        
+        Agent agent = agentRepository.findById(agentId);
+
+        if (agent == null) {
+            throw new IllegalArgumentException("Agente no encontrado con ID: " + agentId);
+        }
+
+        if (name != null && !name.trim().isEmpty()) {
+            agent.setName(name.trim());
+        }
+
+        if (description != null && !description.trim().isEmpty()) {
+            agent.setDescription(description);
+        }
+
+        if (prompt != null && !prompt.trim().isEmpty()) {
+            agent.setPrompt(prompt);
+        }
+
+        if (theme != null && !theme.trim().isEmpty()) {
+            try {
+                AgentTheme agentTheme = AgentTheme.valueOf(theme.trim().toUpperCase());
+                agent.setTheme(agentTheme);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Valor de tema inválido: " + theme + ". Valores válidos son: " + java.util.Arrays.toString(AgentTheme.values()));
+            }
+        }
+
+
+        if (position != null && !position.trim().isEmpty()) {
+            try {
+                AgentPosition agentPosition = AgentPosition.valueOf(position.trim().toUpperCase());
+                agent.setPosition(agentPosition);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Valor de posición inválido: " + position + ". Valores válidos son: " + java.util.Arrays.toString(AgentPosition.values()));
+            }
+        }
+
+        if (website != null && !website.trim().isEmpty()) {
+            agent.setWebsite(website);
+        }
+
+        agentRepository.persist(agent);
+
+        return  AgentResponse.fromEntity(agent);
+                
+    }
+
+
+    @Transactional
+    public AgentResponse publishAgent(Long agentId) {
+        
+        Agent agent = agentRepository.findById(agentId);
+
+        if (agent == null) {
+            throw new IllegalArgumentException("Agente no encontrado con ID: " + agentId);
+        }
+
+        agent.setStatus(AgentStatus.PUBLICADO);
+
+        agentRepository.persist(agent);
+
+        return AgentResponse.fromEntity(agent);
+        
+    }
+
+    @Transactional
+    public AgentResponse deactivateAgent(Long agentId) {
+        
+        Agent agent = agentRepository.findById(agentId);
+
+        if (agent == null) {
+            throw new IllegalArgumentException("Agente no encontrado con ID: " + agentId);
+        }
+
+        agent.setStatus(AgentStatus.DESACTIVADO);
+
+        agentRepository.persist(agent);
+
+        return AgentResponse.fromEntity(agent);
+        
+    }
 
 }

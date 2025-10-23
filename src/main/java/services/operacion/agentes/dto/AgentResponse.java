@@ -2,20 +2,25 @@ package services.operacion.agentes.dto;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.tps.orm.entity.Agent;
 import com.tps.orm.entity.AgentPosition;
 import com.tps.orm.entity.AgentStatus;
 import com.tps.orm.entity.AgentTheme;
 import com.tps.orm.entity.AgentType;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 public class AgentResponse implements java.io.Serializable {
-    
+
+    @JsonProperty("id")
+    private Long id;
+
     @JsonProperty("public_id")
     private String publicId;
 
@@ -52,6 +57,10 @@ public class AgentResponse implements java.io.Serializable {
     @JsonProperty("type")
     private AgentType type;
 
+    private List<String> areas;
+
+    private List<String> documentos;
+
     public AgentResponse(String name, String description, String prompt, AgentStatus status, String userCreate) {
         this.name = name;
         this.description = description;
@@ -60,9 +69,29 @@ public class AgentResponse implements java.io.Serializable {
         this.userCreate = userCreate;
         this.createdAt = LocalDateTime.now().toString();
     }
+
+    public static AgentResponse fromEntity(Agent agent, List<String> vinculos) {
+        AgentResponse response = fromEntity(agent);
+
+        response.setAreas(new java.util.ArrayList<>());
+        response.setDocumentos(new java.util.ArrayList<>());
+
+        if (agent.getType().equals(AgentType.AREAS)){
+            response.setAreas(vinculos);
+        } 
+        
+        if (agent.getType().equals(AgentType.DOCUMENTS)){
+            response.setDocumentos(vinculos);
+        }
+ 
+        return response;
+    }
+ 
     
     public static AgentResponse fromEntity(Agent agent) {
         AgentResponse response = new AgentResponse();
+
+        response.setId(agent.getId());
         response.setPublicId(agent.getPublicId());
         response.setName(agent.getName());
         response.setDescription(agent.getDescription());
@@ -75,6 +104,10 @@ public class AgentResponse implements java.io.Serializable {
         response.setPosition(agent.getPosition());
         response.setWebsite(agent.getWebsite());
         response.setType(agent.getType());
+
+        response.setAreas(new java.util.ArrayList<>());
+        response.setDocumentos(new java.util.ArrayList<>());
+
         return response;
     }
 }

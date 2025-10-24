@@ -36,6 +36,9 @@ public class AgentResponse implements java.io.Serializable {
     @JsonProperty("status")
     private AgentStatus status;
 
+    @JsonProperty("intranet")
+    private Boolean intranet;
+
     @JsonProperty("created_at")
     private String createdAt;
 
@@ -104,7 +107,7 @@ public class AgentResponse implements java.io.Serializable {
         response.setPosition(agent.getPosition());
         response.setWebsite(agent.getWebsite());
         response.setType(agent.getType());
-
+        response.setIntranet(agent.getIntranet());
         response.setAreas(new java.util.ArrayList<>());
         response.setDocumentos(new java.util.ArrayList<>());
 

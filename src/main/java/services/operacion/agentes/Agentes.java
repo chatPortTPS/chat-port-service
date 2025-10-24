@@ -186,7 +186,20 @@ public class Agentes extends RouteBuilder {
                     .required(false)
                     .description("Nombre del archivo del documento")
                 .endParam()
-                .to("direct:addDocumentToAgent");
+                .to("direct:addDocumentToAgent")
+
+            .put("/intranet")
+                .param().name("agentId")
+                    .type(RestParamType.query)
+                    .required(true)
+                    .description("ID del agente para actualizar la configuración de intranet")
+                .endParam()
+                .param().name("status")
+                    .type(RestParamType.query)
+                    .required(true)
+                    .description("Nueva configuración de intranet (true/false)")
+                .endParam()
+                .to("direct:updateAgentIntranet");
             
             
 

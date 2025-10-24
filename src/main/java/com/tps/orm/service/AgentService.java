@@ -39,7 +39,7 @@ public class AgentService {
         Agent agent = new Agent();
         agent.setName(request.getName().trim());
         agent.setDescription(request.getDescription());
-        agent.setPrompt(request.getPrompt());
+        agent.setPrompt(request.getPrompt()); 
         agent.setStatus(request.getStatus() != null ? request.getStatus() : AgentStatus.DESARROLLO);
         agent.setTheme(request.getTheme() != null ? request.getTheme() : AgentTheme.getDefault());
         agent.setPosition(request.getPosition() != null ? request.getPosition() : AgentPosition.getDefault());
@@ -51,8 +51,7 @@ public class AgentService {
 
         return AgentResponse.fromEntity(agent);
     }
-
-
+ 
     @Transactional
     public List<AgentResponse> getAllAgents() {
         List<Agent> agents = agentRepository.listAll();
@@ -211,6 +210,19 @@ public class AgentService {
 
         return AgentResponse.fromEntity(agent);
         
+    }
+    
+    @Transactional
+    public boolean changeIntranetStatus(Long agentId, Boolean intranet) {
+        Agent agent = agentRepository.findById(agentId);
+
+        if (agent == null) {
+            throw new IllegalArgumentException("Agente no encontrado con ID: " + agentId);
+        }
+
+        agent.setIntranet(intranet);
+        agentRepository.persist(agent);
+        return true;
     }
 
 }

@@ -55,6 +55,10 @@ public class Agent extends PanacheEntityBase {
     @Column(name = "status", nullable = false, length = 20)
     private AgentStatus status = AgentStatus.DESARROLLO;
 
+    @NotNull(message = "Intranet flag cannot be null")
+    @Column(name = "intranet", nullable = false)
+    private Boolean intranet;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -92,6 +96,7 @@ public class Agent extends PanacheEntityBase {
         }
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+        intranet = true;
     }
     
     @PreUpdate

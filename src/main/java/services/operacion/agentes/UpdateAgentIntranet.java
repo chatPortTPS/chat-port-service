@@ -18,23 +18,23 @@ public class UpdateAgentIntranet extends RouteBuilder {
         from("direct:updateAgentIntranet")
             .doTry()
                 .process(exchange -> {
-                    String agentId = exchange.getIn().getHeader("publicId", String.class);
-                    String intranet = exchange.getIn().getHeader("intranet", String.class);
+                    String agentId = exchange.getIn().getHeader("agentId", String.class);
+                    String status = exchange.getIn().getHeader("status", String.class);
 
                     if (agentId == null || agentId.trim().isEmpty()) {
-                        throw new IllegalArgumentException("El ID público del agente es obligatorio");
+                        throw new IllegalArgumentException("El identificador del agente es obligatorio");
                     }
 
                     Long id = null;
                     try {
                         id = Long.valueOf(agentId);
                     } catch (NumberFormatException e) {
-                        throw new IllegalArgumentException("El ID público del agente debe ser un número válido");
+                        throw new IllegalArgumentException("El identificador del agente debe ser un número válido");
                     }
 
                     Boolean changeIntranet = null;
                     try {
-                        changeIntranet = Boolean.valueOf(intranet);
+                        changeIntranet = Boolean.valueOf(status);
                     } catch (Exception e) {
                         throw new IllegalArgumentException("El estado de intranet debe ser un valor booleano");
                     }

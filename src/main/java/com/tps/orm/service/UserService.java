@@ -133,6 +133,20 @@ public class UserService {
     }
 
     /**
+     * Obtener usuario por username y mapear a UserResponse
+     */
+    @Transactional
+    public UserResponse getUserByEmail(String email) {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado: " + email));
+
+        if(!user.getStatus()){
+            throw new IllegalArgumentException("Usuario inactivo");
+        }
+
+        return convertToUserResponse(user);
+    }
+
+    /**
      * Buscar usuario por email
      */
     public Optional<User> findByEmail(String email) {

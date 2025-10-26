@@ -35,6 +35,10 @@ public class AgentService {
         if (request.getUserCreate() == null || request.getUserCreate().trim().isEmpty()) {
             throw new IllegalArgumentException("El creador del agente no puede estar vacío");
         }
+
+        if (request.getName().trim().equals("Central ChatPort")) {
+            throw new IllegalArgumentException("El nombre del agente no puede ser 'Central ChatPort'");
+        }
   
         Agent agent = new Agent();
         agent.setName(request.getName().trim());
@@ -51,6 +55,33 @@ public class AgentService {
 
         return AgentResponse.fromEntity(agent);
     }
+
+
+    @Transactional
+    public AgentResponse getCentralAgent() {
+        List<Agent> agents = agentRepository.findByName("Central ChatPort");
+  
+        if (agents.isEmpty()) {
+            
+            //crear el agente central si no existe
+            Agent centralAgent = new Agent();
+            centralAgent.setName("Central ChatPort");
+            centralAgent.setDescription("Agente central para gestión de consultas generales");
+            centralAgent.setPrompt("Eres el agente central de ChatPort, encargado de gestionar consultas generales y redirigir a los agentes especializados cuando sea necesario.");
+            centralAgent.setStatus(AgentStatus.PUBLICADO);
+            centralAgent.setTheme(AgentTheme.MINI);
+            centralAgent.setPosition(AgentPosition.BOTTOM_RIGHT);
+            centralAgent.setType(AgentType.DYNAMIC);
+            centralAgent.setWebsite("Current website");
+            centralAgent.setUserCreate("system");
+            agentRepository.persist(centralAgent);
+            return AgentResponse.fromEntity(centralAgent);
+            
+        }
+
+        return AgentResponse.fromEntity(agents.get(0));
+    }
+
  
     @Transactional
     public List<AgentResponse> getAllAgents() {

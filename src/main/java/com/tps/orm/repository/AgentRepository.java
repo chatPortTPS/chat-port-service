@@ -14,4 +14,8 @@ public class AgentRepository  implements PanacheRepository<Agent> {
         return find("publicId = ?1", publicId).list();
     }
 
+    public List<Agent> findByName(String name) { 
+        return find("name = ?1", name).list();
+    }
+
 }

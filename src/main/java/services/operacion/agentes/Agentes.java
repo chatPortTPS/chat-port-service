@@ -199,10 +199,11 @@ public class Agentes extends RouteBuilder {
                     .required(true)
                     .description("Nueva configuración de intranet (true/false)")
                 .endParam()
-                .to("direct:updateAgentIntranet");
-            
-            
+                .to("direct:updateAgentIntranet")
 
+
+            .post("/central")
+                .to("direct:getCentralAgente");
             
       
     }

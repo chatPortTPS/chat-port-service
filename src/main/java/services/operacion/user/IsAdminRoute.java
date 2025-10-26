@@ -31,7 +31,7 @@ public class IsAdminRoute  extends RouteBuilder {
                     }
 
                     List<UserResponse> users = new ArrayList<>(); 
-                    users.add(userService.getUserByUsername(username));
+                    users.add(userService.getUserByEmail(username));
 
                     exchange.getIn().setHeader("message", "Usuario Activo");
                     exchange.getIn().setBody(users);

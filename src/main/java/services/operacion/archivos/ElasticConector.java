@@ -1,6 +1,10 @@
 package services.operacion.archivos;
 
 import java.util.Base64;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import java.security.cert.X509Certificate;
 
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
@@ -20,11 +24,25 @@ public class ElasticConector extends RouteBuilder {
     @ConfigProperty(name = "elasticsearch.password", defaultValue = "")
     String passwordElastic;
 
-    @ConfigProperty(name = "elastic.index.name", defaultValue = "") 
+    @ConfigProperty(name = "elastic.index.name", defaultValue = "")
     String elasticIndexName;
 
     @Override
     public void configure() throws Exception {
+
+        // Crear SSLContext que confía en todos los certificados
+        TrustManager[] trustAllCerts = new TrustManager[] {
+            new X509TrustManager() {
+                public X509Certificate[] getAcceptedIssuers() { return null; }
+                public void checkClientTrusted(X509Certificate[] certs, String authType) { }
+                public void checkServerTrusted(X509Certificate[] certs, String authType) { }
+            }
+        };
+
+        SSLContext sslContext = SSLContext.getInstance("TLS");
+        sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+
+        getCamelContext().getRegistry().bind("mySSLContext", sslContext);
 
         String auth = "Basic " + Base64.getEncoder()
             .encodeToString((userElastic + ":" + passwordElastic).getBytes(java.nio.charset.StandardCharsets.UTF_8));
@@ -46,7 +64,7 @@ public class ElasticConector extends RouteBuilder {
 
             .log(LoggingLevel.ERROR, "Consulta a ElasticSearch: ${body}")
             // Usa endpoint sin path; bridgeEndpoint para no reenviar Host, etc.
-            .to(hostElastic + "?bridgeEndpoint=true")
+            .to(hostElastic + "?bridgeEndpoint=true&sslContextParameters=#mySSLContext")
 
             .log(org.apache.camel.LoggingLevel.ERROR, "Respuesta de ElasticSearch: ${body}");
 

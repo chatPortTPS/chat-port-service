@@ -11,15 +11,13 @@ import jakarta.enterprise.context.ApplicationScoped;
 @ApplicationScoped
 public class ElasticConector extends RouteBuilder {
 
-    @ConfigProperty(name = "camel.component.elasticsearch.host-addresses", defaultValue = "")
+    @ConfigProperty(name = "elasticsearch.host", defaultValue = "")
     String hostElastic;
 
-
-    @ConfigProperty(name = "camel.component.elasticsearch.user", defaultValue = "")
+    @ConfigProperty(name = "elasticsearch.user", defaultValue = "")
     String userElastic;
 
-
-    @ConfigProperty(name = "camel.component.elasticsearch.password", defaultValue = "")
+    @ConfigProperty(name = "elasticsearch.password", defaultValue = "")
     String passwordElastic;
 
     @ConfigProperty(name = "elastic.index.name", defaultValue = "") 
@@ -27,13 +25,6 @@ public class ElasticConector extends RouteBuilder {
 
     @Override
     public void configure() throws Exception {
-        
-        
-        from("direct:callElasticSearch") 
-            .log(LoggingLevel.ERROR, "Consulta de ElasticSearch: ${body}")
-            .to("elasticsearch://default?operation=Search&indexName=tps-gestor-documental")
-            .log(LoggingLevel.ERROR, "Respuesta de ElasticSearch: ${body}")
-        .end();
 
         String auth = "Basic " + Base64.getEncoder()
             .encodeToString((userElastic + ":" + passwordElastic).getBytes(java.nio.charset.StandardCharsets.UTF_8));

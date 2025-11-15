@@ -1,8 +1,9 @@
 package services.operacion.archivos;
 
 
-import jakarta.enterprise.context.ApplicationScoped;
 import org.apache.camel.builder.RouteBuilder;
+
+import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public class ArchivosRoute extends RouteBuilder {
@@ -17,6 +18,7 @@ public class ArchivosRoute extends RouteBuilder {
         
             // GET /archivos
             .get()
+                .description("Obtener lista de archivos indexados")
                 .to("direct:getArchivos");
 
     }

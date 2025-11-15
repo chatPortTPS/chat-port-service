@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import com.tps.orm.dto.PageRequest;
 import com.tps.orm.dto.PagedResponse;
 import com.tps.orm.entity.User;
+import com.tps.orm.repository.AreasUsuarioRepository;
 import com.tps.orm.repository.UserRepository;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -20,6 +21,9 @@ public class UserService {
 
     @Inject
     UserRepository userRepository;
+
+    @Inject
+    AreasUsuarioRepository areasUsuarioRepository;
 
     /**
      * Crear nuevo usuario
@@ -289,6 +293,18 @@ public class UserService {
         response.setStatus(user.getStatus());
         response.setCreatedAt(user.getCreatedAt().toString());
         return response;
+    }
+
+    @Transactional
+    public List<String> getUserAreasByEmail(String email) {
+       
+        List<String> areas = areasUsuarioRepository.find("correo", email)
+                .stream()
+                .map(areaUsuario -> areaUsuario.getNombreNormalizado())
+                .collect(Collectors.toList());
+
+        return areas;
+        
     }
  
 }

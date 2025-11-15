@@ -1,10 +1,11 @@
 package services.operacion.archivos;
 
+import java.security.cert.X509Certificate;
 import java.util.Base64;
+
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-import java.security.cert.X509Certificate;
 
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;

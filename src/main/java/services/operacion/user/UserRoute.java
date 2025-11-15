@@ -52,6 +52,20 @@ public class UserRoute extends RouteBuilder {
                 .to("direct:createUser")
 
 
+             
+            // GET /user/areas
+            .get("/areas")
+                .consumes("application/json")
+                .produces("application/json")
+                .description("Retorna los areas de un usuario por su email en SGD.")
+                .param()
+                    .name("email")
+                    .type(RestParamType.query)
+                    .dataType("string")
+                    .required(true)
+                .endParam()
+                .to("direct:getUserAreas")
+
 
             // POST /user/desactivate
             .post("/desactivate")

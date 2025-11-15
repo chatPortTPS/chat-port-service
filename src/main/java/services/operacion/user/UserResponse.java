@@ -1,10 +1,13 @@
 package services.operacion.user;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.time.LocalDateTime;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Data
 @NoArgsConstructor
@@ -24,6 +27,9 @@ public class UserResponse implements Serializable  {
     
     @JsonProperty("created_at") 
     private String createdAt;
+
+    @JsonProperty("areas")
+    private List<String> areas;
 
     public UserResponse(String username, String email) {
         this.username = username;

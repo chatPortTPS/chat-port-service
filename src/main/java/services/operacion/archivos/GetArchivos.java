@@ -37,7 +37,7 @@ public class GetArchivos extends RouteBuilder {
                 // Create new object with _source data and add total_fragmentos
                 com.fasterxml.jackson.databind.node.ObjectNode result = sourceNode.deepCopy();
 
-                result.put("total_fragmentos", sourceNode.path("chunk_index").asInt());
+                result.put("total_fragmentos", sourceNode.path("chunk_index").asInt() + 1);
                 
                 resultArray.add(result);
             }

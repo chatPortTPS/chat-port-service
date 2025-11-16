@@ -15,7 +15,7 @@ public class GetArchivos extends RouteBuilder {
             .log("Obteniendo archivos...")
             .to("velocity:/META-INF/vm/es/getAllArchivos.vm?contentCache=false")
             .to("direct:callElasticSearchHttp")
-            .process(exchange -> {
+            .process(exchange -> { 
             String response = exchange.getIn().getBody(String.class);
             
             // Parse JSON response

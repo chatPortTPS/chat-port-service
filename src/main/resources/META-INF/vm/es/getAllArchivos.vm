@@ -3,14 +3,28 @@
   "aggs": {
     "distinct_titles": {
       "terms": {
-        "field": "title.keyword",
+        "field": "doc_id",
         "size": 1000
       },
       "aggs": {
         "latest_doc": {
           "top_hits": {
             "size": 1,
-            "_source": ["doc_id", "title", "areas", "fecha", "metadata"]
+            "_source": [
+              "doc_id",
+              "title",
+              "areas",
+              "fecha",
+              "metadata",
+              "chunk_index"
+            ],
+            "sort": [
+              {
+                "chunk_index": {
+                  "order": "desc"
+                }
+              }
+            ]
           }
         }
       }

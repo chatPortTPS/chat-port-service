@@ -1,13 +1,13 @@
 {
   "size": 0,
   "aggs": {
-    "distinct_titles": {
+    "distinct_docs": {
       "terms": {
-        "field": "title.keyword",
+        "field": "doc_id",
         "size": 1000
       },
       "aggs": {
-        "latest_doc": {
+        "any_doc": {
           "top_hits": {
             "size": 1,
             "_source": ["doc_id", "title", "areas", "fecha", "metadata"]

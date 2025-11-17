@@ -2,6 +2,7 @@ package services.operacion.archivos;
 
 
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.model.rest.RestParamType;
 
 import jakarta.enterprise.context.ApplicationScoped;
 
@@ -19,7 +20,17 @@ public class ArchivosRoute extends RouteBuilder {
             // GET /archivos
             .get()
                 .description("Obtener lista de archivos indexados")
-                .to("direct:getArchivos");
+                .to("direct:getArchivos")
+
+            // GET /archivos/{uuid}
+            .get("/{uuid}")
+                .param().name("uuid")
+                    .type(RestParamType.path)
+                    .description("UUID del archivo a obtener")
+                    .required(true)
+                .endParam()
+                .description("Retorna el documento en base 64 y en zip segun UUID")
+                .to("direct:getArchivoByUuid");
 
     }
 

@@ -1,12 +1,18 @@
 package services.operacion.archivos;
 
-import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.Exchange;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
-import jakarta.enterprise.context.ApplicationScoped;
-import java.util.Base64;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.util.Base64;
 import java.util.zip.GZIPOutputStream;
+
+import org.apache.camel.builder.RouteBuilder;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.Session;
+
+import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
 public class GetArchivoByUuid extends RouteBuilder {
@@ -15,7 +21,7 @@ public class GetArchivoByUuid extends RouteBuilder {
     String host;
     
     @ConfigProperty(name = "ftp.port", defaultValue = "22")
-    String port;
+    int port;
     
     @ConfigProperty(name = "ftp.username")
     String username;
@@ -30,40 +36,109 @@ public class GetArchivoByUuid extends RouteBuilder {
     public void configure() throws Exception {
         
         from("direct:getArchivoByUuid").routeId("getArchivoByUuid") 
-            .doTry() 
-                // Construir la URL de SFTP dinámicamente con el UUID
-                .setHeader("ftpUrl", simple("sftp://" + username + "@" + host + ":" + port 
-                    + workingDir + "/${header.uuid}?password=RAW(" + password + ")"
-                    + "&binary=true&passiveMode=true&disconnect=true"))
+                .log("Descargando archivo ${header.uuid} desde SFTP")
                 
-                .log("Conectando a SFTP: ${header.ftpUrl}")
-                
-                // Obtener el archivo desde SFTP
-                .toD("${header.ftpUrl}")
-                
-                // Comprimir con GZIP
+                // Descargar archivo usando JSch directamente
                 .process(exchange -> {
-                    byte[] originalBytes = exchange.getIn().getBody(byte[].class);
+                    String uuid = exchange.getIn().getHeader("uuid", String.class);
+                    String remoteFile = "/" + workingDir + "/" + uuid;
                     
-                    try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                        GZIPOutputStream gzipOut = new GZIPOutputStream(baos)) {
+                    log.info("Conectando a SFTP: " + username + "@" + host + ":" + port);
+                    log.info("Archivo remoto: " + remoteFile);
+                    
+                    JSch jsch = new JSch();
+                    Session session = null;
+                    ChannelSftp channelSftp = null;
+                    
+                    try {
+                        session = jsch.getSession(username, host, port);
+                        session.setPassword(password);
+                        session.setConfig("StrictHostKeyChecking", "no");
+                        session.connect(30000);
                         
-                        gzipOut.write(originalBytes);
-                        gzipOut.finish();
+                        channelSftp = (ChannelSftp) session.openChannel("sftp");
+                        channelSftp.connect(30000);
                         
-                        byte[] compressedBytes = baos.toByteArray();
+                        log.info("Conectado a SFTP, verificando archivo...");
                         
-                        // Codificar en Base64
-                        String base64Encoded = Base64.getEncoder().encodeToString(compressedBytes);
-                         
-                        // Establecer el body con el contenido codificado
-                        exchange.getIn().setBody(base64Encoded);
+                        // Verificar que el archivo existe
+                        try {
+                            channelSftp.lstat(remoteFile);
+                            log.info("Archivo encontrado, descargando...");
+                        } catch (Exception e) {
+                            throw new RuntimeException("Archivo no encontrado en SFTP: " + remoteFile + " - " + e.getMessage());
+                        }
+                        
+                        try (InputStream inputStream = channelSftp.get(remoteFile);
+                             ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+                            
+                            byte[] buffer = new byte[8192];
+                            int bytesRead;
+                            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                                outputStream.write(buffer, 0, bytesRead);
+                            }
+                            
+                            byte[] fileBytes = outputStream.toByteArray();
+                            log.info("Archivo descargado: " + fileBytes.length + " bytes");
+                            
+                            exchange.getIn().setBody(fileBytes);
+                        }
+                        
+                    } catch (Exception e) {
+                        log.error("Error descargando archivo desde SFTP: " + e.getMessage(), e);
+                        throw new RuntimeException("Error descargando archivo: " + e.getMessage(), e);
+                    } finally {
+                        if (channelSftp != null && channelSftp.isConnected()) {
+                            channelSftp.disconnect();
+                        }
+                        if (session != null && session.isConnected()) {
+                            session.disconnect();
+                        }
                     }
                 })
-                .to("direct:success")
-            .doCatch(Exception.class)
-                .to("direct:error")
-            .end();
+                
+                // Validar que el archivo se descargó
+                .choice()
+                    .when(body().isNull())
+                        .log("ERROR: No se pudo descargar el archivo ${header.uuid}")
+                        .process(exchange -> {
+                            String uuid = exchange.getIn().getHeader("uuid", String.class);
+                            throw new RuntimeException("Archivo no encontrado en SFTP: " + uuid);
+                        })
+                    .otherwise()
+                        // Comprimir con GZIP
+                        .process(exchange -> {
+                            try {
+                                byte[] originalBytes = exchange.getIn().getBody(byte[].class);
+                                
+                                if (originalBytes == null || originalBytes.length == 0) {
+                                    throw new RuntimeException("El archivo descargado está vacío");
+                                }
+                                
+                                log.info("Tamaño original del archivo: " + originalBytes.length + " bytes");
+                                
+                                try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                                    GZIPOutputStream gzipOut = new GZIPOutputStream(baos)) {
+                                    
+                                    gzipOut.write(originalBytes);
+                                    gzipOut.finish();
+                                    
+                                    byte[] compressedBytes = baos.toByteArray();
+                                    
+                                    log.info("Tamaño comprimido: " + compressedBytes.length + " bytes");
+                                    
+                                    // Codificar en Base64
+                                    String base64Encoded = Base64.getEncoder().encodeToString(compressedBytes);
+                                     
+                                    // Establecer el body con el contenido codificado
+                                    exchange.getIn().setBody(base64Encoded);
+                                }
+                            } catch (java.io.IOException e) {
+                                throw new RuntimeException("Error comprimiendo archivo", e);
+                            }
+                        })
+                .end()
+                .to("direct:success");
     }
 
 }

@@ -32,6 +32,9 @@ public class GetUserAreas extends RouteBuilder {
  
                     List<String> areas = userService.getUserAreasByEmail(email.toLowerCase());
 
+                    //eliminar repetidos
+                    areas = areas.stream().distinct().toList();
+
                     exchange.getIn().setBody(areas);
                 })
                 .to("direct:success")

@@ -33,9 +33,7 @@ public class ElasticConector extends RouteBuilder {
 
     @ConfigProperty(name = "elastic.index.name", defaultValue = "")
     String elasticIndexName;
-
-    String auth = "Basic " + Base64.getEncoder().encodeToString((userElastic + ":" + passwordElastic).getBytes(java.nio.charset.StandardCharsets.UTF_8));
-
+ 
     @Override
     public void configure() throws Exception {
 
@@ -70,6 +68,8 @@ public class ElasticConector extends RouteBuilder {
 
         getCamelContext().getRegistry().bind("myHttpClientConfigurer", configurer);
   
+        String auth = "Basic " + Base64.getEncoder().encodeToString((userElastic + ":" + passwordElastic).getBytes(java.nio.charset.StandardCharsets.UTF_8));
+ 
         from("direct:callElasticSearchHttp")  //consumer
         
             // Limpia cualquier arrastre del request entrante

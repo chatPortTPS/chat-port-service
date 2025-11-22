@@ -1,6 +1,7 @@
 package services.operacion.archivos;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.UUID;
 
@@ -9,6 +10,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import org.apache.camel.builder.RouteBuilder;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.apache.camel.attachment.AttachmentMessage;
+import java.util.List;
+import services.operacion.area.dto.UploadResponse;
 
 @ApplicationScoped
 public class Upload extends RouteBuilder {
@@ -169,7 +172,22 @@ public class Upload extends RouteBuilder {
                         exchange.getIn().setBody(jsonResponse);
                     })
                     .wireTap("direct:jmsSendDocxtract")
-                    .setBody(simple("Archivo subido correctamente con UUID: ${header.fileUuid}"))
+                    .log("Respuesta de artemis: ${body}") 
+                    .process(exchange -> {
+                        List<UploadResponse> respuesta = new ArrayList<>();
+                        
+                        UploadResponse uploadResponse = new UploadResponse();
+                        uploadResponse.setUuid(exchange.getIn().getHeader("fileUuid", String.class));
+                        uploadResponse.setNombre(exchange.getIn().getHeader("nombre", String.class));
+                        uploadResponse.setCorreo(exchange.getIn().getHeader("correo", String.class));
+                        uploadResponse.setAutor(exchange.getIn().getHeader("autor", String.class));
+                        uploadResponse.setAgenteId(exchange.getIn().getHeader("agenteId", String.class));
+                        uploadResponse.setNombreAgente(exchange.getIn().getHeader("nombreAgente", String.class));
+
+                        respuesta.add(uploadResponse);
+
+                        exchange.getIn().setBody(respuesta);
+                    })
                     .setHeader("message", constant("Archivo subido exitosamente"))
                     .to("direct:success")
                 .endDoTry()

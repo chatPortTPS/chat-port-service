@@ -65,6 +65,12 @@ public class ArchivosRoute extends RouteBuilder {
                     .dataType("string")
                     .required(true)
                 .endParam()
+                .param().name("nombreAgente")
+                    .type(RestParamType.formData)
+                    .description("Nombre del agente")
+                    .dataType("string")
+                    .required(true)
+                .endParam()
                 .to("direct:upload");
 
     }

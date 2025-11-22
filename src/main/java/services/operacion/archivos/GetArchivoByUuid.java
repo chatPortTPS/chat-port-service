@@ -1,6 +1,7 @@
 package services.operacion.archivos;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Base64;
 import java.util.zip.GZIPOutputStream;
@@ -10,7 +11,9 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import com.jcraft.jsch.SftpException;
 
 import jakarta.enterprise.context.ApplicationScoped;
 
@@ -65,7 +68,7 @@ public class GetArchivoByUuid extends RouteBuilder {
                         try {
                             channelSftp.lstat(remoteFile);
                             log.info("Archivo encontrado, descargando...");
-                        } catch (Exception e) {
+                        } catch (SftpException e) {
                             throw new RuntimeException("Archivo no encontrado en SFTP: " + remoteFile + " - " + e.getMessage());
                         }
                         
@@ -84,7 +87,7 @@ public class GetArchivoByUuid extends RouteBuilder {
                             exchange.getIn().setBody(fileBytes);
                         }
                         
-                    } catch (Exception e) {
+                    } catch (JSchException | IOException | RuntimeException e) {
                         log.error("Error descargando archivo desde SFTP: " + e.getMessage(), e);
                         throw new RuntimeException("Error descargando archivo: " + e.getMessage(), e);
                     } finally {

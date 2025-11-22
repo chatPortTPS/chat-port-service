@@ -15,6 +15,7 @@ import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuil
 import org.apache.hc.client5.http.ssl.NoopHostnameVerifier;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactory;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.apache.camel.Exchange;
 
 import jakarta.enterprise.context.ApplicationScoped;
 
@@ -33,14 +34,19 @@ public class ElasticConector extends RouteBuilder {
     @ConfigProperty(name = "elastic.index.name", defaultValue = "")
     String elasticIndexName;
 
+    String auth = "Basic " + Base64.getEncoder().encodeToString((userElastic + ":" + passwordElastic).getBytes(java.nio.charset.StandardCharsets.UTF_8));
+
     @Override
     public void configure() throws Exception {
 
         // Crear SSLContext que confía en todos los certificados
         TrustManager[] trustAllCerts = new TrustManager[] {
             new X509TrustManager() {
+                @Override
                 public X509Certificate[] getAcceptedIssuers() { return null; }
+                @Override
                 public void checkClientTrusted(X509Certificate[] certs, String authType) { }
+                @Override
                 public void checkServerTrusted(X509Certificate[] certs, String authType) { }
             }
         };
@@ -63,30 +69,28 @@ public class ElasticConector extends RouteBuilder {
         };
 
         getCamelContext().getRegistry().bind("myHttpClientConfigurer", configurer);
-
-        String auth = "Basic " + Base64.getEncoder()
-            .encodeToString((userElastic + ":" + passwordElastic).getBytes(java.nio.charset.StandardCharsets.UTF_8));
-
-        from("direct:callElasticSearchHttp")  // tu consumer
+  
+        from("direct:callElasticSearchHttp")  //consumer
+        
             // Limpia cualquier arrastre del request entrante
             .removeHeaders("CamelHttp*")
-            .removeHeader(org.apache.camel.Exchange.HTTP_PATH)
-            .removeHeader(org.apache.camel.Exchange.HTTP_URI)
-            .removeHeader(org.apache.camel.Exchange.HTTP_QUERY)
+            .removeHeader(Exchange.HTTP_PATH)
+            .removeHeader(Exchange.HTTP_URI)
+            .removeHeader(Exchange.HTTP_QUERY)
 
             // Configura la llamada a ES
             .setHeader("Authorization", constant(auth))
-            .setHeader(org.apache.camel.Exchange.HTTP_METHOD, constant("POST"))
-            .setHeader(org.apache.camel.Exchange.CONTENT_TYPE, constant("application/json"))
+            .setHeader(Exchange.HTTP_METHOD, constant("POST"))
+            .setHeader(Exchange.CONTENT_TYPE, constant("application/json"))
 
             // Fuerza el path exacto hacia Elasticsearch
-            .setHeader(org.apache.camel.Exchange.HTTP_PATH, constant("/" + elasticIndexName + "/_search"))
+            .setHeader(Exchange.HTTP_PATH, constant("/" + elasticIndexName + "/_search"))
 
             .log(LoggingLevel.ERROR, "Consulta a ElasticSearch: ${body}")
             // Usa endpoint sin path; bridgeEndpoint para no reenviar Host, etc.
             .to(hostElastic + "?bridgeEndpoint=true&httpClientConfigurer=#myHttpClientConfigurer")
 
-            .log(org.apache.camel.LoggingLevel.ERROR, "Respuesta de ElasticSearch: ${body}");
+            .log(LoggingLevel.ERROR, "Respuesta de ElasticSearch: ${body}");
 
     }
 

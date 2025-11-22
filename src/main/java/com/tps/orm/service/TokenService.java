@@ -1,30 +1,16 @@
 package com.tps.orm.service;
 
-import java.security.SecureRandom;
-import java.util.Base64;
-import java.util.List;
-
-import com.tps.orm.entity.Agent;
-import com.tps.orm.entity.AgentPosition;
-import com.tps.orm.entity.AgentStatus;
-import com.tps.orm.entity.AgentTheme;
-import com.tps.orm.entity.AgentType;
-import com.tps.orm.entity.AreaAgente;
-import com.tps.orm.repository.AgentRepository;
-import com.tps.orm.repository.AreaAgenteRepository;
+import java.util.List; 
+import com.tps.orm.entity.Agent; 
+import com.tps.orm.repository.AgentRepository; 
 import com.tps.orm.repository.TokenAgenteRepository;
-import com.tps.orm.repository.TokenRepository;
-
+import com.tps.orm.repository.TokenRepository; 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
-import services.operacion.agentes.dto.AgentRequest;
-import services.operacion.agentes.dto.AgentResponse;
-import services.operacion.token.dto.TokenResponse;
-
+import jakarta.transaction.Transactional; 
+import services.operacion.token.dto.TokenResponse; 
 import com.tps.orm.entity.Tokens;
-import com.tps.orm.entity.TokenAgente;
-import co.elastic.clients.elasticsearch.core.termvectors.Token;
+import com.tps.orm.entity.TokenAgente; 
 
 @ApplicationScoped
 public class TokenService {

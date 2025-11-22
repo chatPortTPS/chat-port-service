@@ -9,8 +9,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import org.apache.camel.builder.RouteBuilder;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.apache.camel.attachment.AttachmentMessage;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @ApplicationScoped
 public class Upload extends RouteBuilder {
@@ -167,13 +165,11 @@ public class Upload extends RouteBuilder {
                             "AGENTES/" + nombreAgente,
                             agenteId != null ? agenteId : ""
                         );
-                        
-                        ObjectMapper mapper = new ObjectMapper();
-                        JsonNode jsonResponseNode = mapper.readTree(jsonResponse);
-
-                        exchange.getIn().setBody(jsonResponseNode);
+                         
+                        exchange.getIn().setBody(jsonResponse);
                     })
                     .wireTap("direct:jmsSendDocxtract")
+                    .setBody(simple("Archivo subido correctamente con UUID: ${header.fileUuid}"))
                     .setHeader("message", constant("Archivo subido exitosamente"))
                     .to("direct:success")
                 .endDoTry()
@@ -182,7 +178,6 @@ public class Upload extends RouteBuilder {
                     .to("direct:error")
                 .end();
 
-            
     }
 
 }

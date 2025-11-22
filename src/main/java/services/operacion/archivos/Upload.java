@@ -78,6 +78,8 @@ public class Upload extends RouteBuilder {
                         String autor = exchange.getIn().getHeader("autor", String.class);
                         String agenteId = exchange.getIn().getHeader("agenteId", String.class);
                         String nombre = exchange.getIn().getHeader("nombre", String.class);
+                        String nombreAgente = exchange.getIn().getHeader("nombreAgente", String.class);
+                        
                         
                         // Generar UUID para el nombre del archivo (sin guiones y en mayúsculas)
                         String uuid = UUID.randomUUID().toString().replace("-", "").toUpperCase();
@@ -98,6 +100,7 @@ public class Upload extends RouteBuilder {
                         exchange.getIn().setHeader("autor", autor);
                         exchange.getIn().setHeader("agenteId", agenteId);
                         exchange.getIn().setHeader("nombre", nombre);
+                        exchange.getIn().setHeader("nombreAgente", nombreAgente);
                         
                         // Setear el body con el InputStream del archivo
                         exchange.getIn().setBody(inputStream);
@@ -129,7 +132,8 @@ public class Upload extends RouteBuilder {
                         String autor = exchange.getIn().getHeader("autor", String.class);
                         String nombre = exchange.getIn().getHeader("nombre", String.class);
                         String agenteId = exchange.getIn().getHeader("agenteId", String.class);
-                        
+                        String nombreAgente = exchange.getIn().getHeader("nombreAgente", String.class);
+
                         // Obtener extensión del archivo
                         String extension = "";
                         if (originalFileName != null && originalFileName.contains(".")) {
@@ -151,8 +155,8 @@ public class Upload extends RouteBuilder {
                             "\"correo\": \"%s\", " +
                             "\"autor\": \"%s\", " +
                             "\"ruta\": \"%s\", " +
-                            "\"areas\": null, " +
-                            "\"agente\": null " +
+                            "\"areas\": [], " +
+                            "\"agente\": \"%s\" " +
                             "}]}",
                             archivoConExtension,
                             nombre != null ? nombre : "",
@@ -160,7 +164,7 @@ public class Upload extends RouteBuilder {
                             timestamp,
                             correo != null ? correo : "",
                             autor != null ? autor : "",
-                            workingDir,
+                            "AGENTES/" + nombreAgente,
                             agenteId != null ? agenteId : ""
                         );
                         
@@ -177,7 +181,7 @@ public class Upload extends RouteBuilder {
                 .doCatch(Exception.class)
                     .log("Error al subir archivo: ${exception.message}")
                     .to("direct:error");
-                    
+
             
     }
 

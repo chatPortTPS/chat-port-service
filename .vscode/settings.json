@@ -20,5 +20,8 @@
         "openapi.*",
         "api.*"
     ],
-    "java.configuration.updateBuildConfiguration": "interactive"
+    "java.configuration.updateBuildConfiguration": "interactive",
+    "microprofile.tools.validation.unassigned.excluded": [
+        "ftp.host"
+    ]
 }

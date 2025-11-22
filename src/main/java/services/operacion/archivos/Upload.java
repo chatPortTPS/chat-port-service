@@ -189,6 +189,7 @@ public class Upload extends RouteBuilder {
                         exchange.getIn().setBody(respuesta);
                     })
                     .setHeader("message", constant("Archivo subido exitosamente"))
+                    .setHeader("BodyType", constant("services.operacion.area.dto.UploadResponse"))
                     .to("direct:success")
                 .endDoTry()
                 .doCatch(Exception.class)

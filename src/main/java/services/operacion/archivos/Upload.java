@@ -171,16 +171,14 @@ public class Upload extends RouteBuilder {
                         ObjectMapper mapper = new ObjectMapper();
                         JsonNode jsonResponseNode = mapper.readTree(jsonResponse);
 
-                        exchange.getIn().setHeader("JSON", jsonResponseNode);
-                        exchange.getIn().setBody(jsonResponse);
+                        exchange.getIn().setBody(jsonResponseNode);
                     })
                     .wireTap("direct:jmsSendDocxtract")
                     .setHeader("message", constant("Archivo subido exitosamente"))
-                    .setBody(simple("${header.JSON}"))
                     .to("direct:success")
                 .endDoTry()
                 .doCatch(Exception.class)
-                    .log("Error al subir archivo: ${exception.message}") 
+                    .log("Error al subir archivo: ${exception.message}")
                     .to("direct:error")
                 .end();
 

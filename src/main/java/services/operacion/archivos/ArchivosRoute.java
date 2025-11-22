@@ -14,7 +14,6 @@ public class ArchivosRoute extends RouteBuilder {
         
         rest("/archivos")
             .description("Servicio para gestion de archivos indexados y disponibles en para preguntas")
-            .consumes("application/json")
             .produces("application/json")
         
             // GET /archivos
@@ -30,7 +29,25 @@ public class ArchivosRoute extends RouteBuilder {
                     .required(true)
                 .endParam()
                 .description("Retorna el documento en base 64 y en zip segun UUID")
-                .to("direct:getArchivoByUuid");
+                .to("direct:getArchivoByUuid")
+
+            .post()
+                .consumes("multipart/form-data")
+                .bindingMode(org.apache.camel.model.rest.RestBindingMode.off)
+                .description("Subir un nuevo archivo")
+                .param().name("file")
+                    .type(RestParamType.formData)
+                    .description("Archivo a subir")
+                    .dataType("object")
+                    .required(true)
+                .endParam()
+                .param().name("metadata")
+                    .type(RestParamType.formData)
+                    .description("Metadatos adicionales del archivo (JSON opcional)")
+                    .dataType("string")
+                    .required(false)
+                .endParam()
+                .to("direct:upload");
 
     }
 

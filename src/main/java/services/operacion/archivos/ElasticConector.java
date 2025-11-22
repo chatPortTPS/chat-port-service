@@ -88,9 +88,6 @@ public class ElasticConector extends RouteBuilder {
 
             .log(org.apache.camel.LoggingLevel.ERROR, "Respuesta de ElasticSearch: ${body}");
 
-
-
-
     }
 
 }

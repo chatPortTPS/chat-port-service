@@ -141,6 +141,7 @@ public class Upload extends RouteBuilder {
                             extension = originalFileName.substring(originalFileName.lastIndexOf("."));
                         }
                         String archivoConExtension = fileUuid + extension;
+                        exchange.getIn().setHeader("archivoConExtension", archivoConExtension);
                         
                         // Obtener timestamp actual en formato ISO
                         String timestamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME);
@@ -177,7 +178,7 @@ public class Upload extends RouteBuilder {
                         List<UploadResponse> respuesta = new ArrayList<>();
                         
                         UploadResponse uploadResponse = new UploadResponse();
-                        uploadResponse.setUuid(exchange.getIn().getHeader("fileUuid", String.class));
+                        uploadResponse.setUuid(exchange.getIn().getHeader("archivoConExtension", String.class));
                         uploadResponse.setNombre(exchange.getIn().getHeader("nombre", String.class));
                         uploadResponse.setCorreo(exchange.getIn().getHeader("correo", String.class));
                         uploadResponse.setAutor(exchange.getIn().getHeader("autor", String.class));
@@ -189,12 +190,14 @@ public class Upload extends RouteBuilder {
                         exchange.getIn().setBody(respuesta);
                     })
                     .setHeader("message", constant("Archivo subido exitosamente"))
-                    .setHeader("BodyType", constant("com.chat.port.response.Response"))
                     .to("direct:success")
+                    .marshal().json()
                 .endDoTry()
                 .doCatch(Exception.class)
                     .log("Error al subir archivo: ${exception.message}")
+                    .setHeader("message", simple("${exception.message}"))
                     .to("direct:error")
+                    .marshal().json()
                 .end();
 
     }

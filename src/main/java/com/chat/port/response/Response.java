@@ -7,6 +7,8 @@ import java.util.ArrayList;
 @Data
 public class Response implements Serializable {
 
+    private static final long serialVersionUID = 1905122041950251207L;
+
     private String message;
     private Object body;
     private String fecha;

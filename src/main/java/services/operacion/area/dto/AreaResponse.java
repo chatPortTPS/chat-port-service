@@ -25,6 +25,11 @@ public class AreaResponse {
         this.publicId = generatePublicId(name);
     }
     
+    public void setNombre(String name) {
+        this.name = name;
+        this.publicId = generatePublicId(name);
+    }
+
     private String generatePublicId(String name) {
         if (name == null) {
             return null;

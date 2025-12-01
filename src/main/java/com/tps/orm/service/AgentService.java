@@ -1,5 +1,6 @@
 package com.tps.orm.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.tps.orm.entity.Agent;
@@ -50,6 +51,12 @@ public class AgentService {
         agent.setWebsite(request.getWebsite());
         agent.setType(request.getType() != null ? request.getType() : AgentType.getDefault());
         agent.setUserCreate(request.getUserCreate().trim());
+        
+        // Inicializar timestamps manualmente (para que funcione en tests mockito)
+        LocalDateTime now = LocalDateTime.now();
+        agent.setCreatedAt(now);
+        agent.setUpdatedAt(now);
+        agent.setIntranet(true);
          
         agentRepository.persist(agent);
 
@@ -74,6 +81,12 @@ public class AgentService {
             centralAgent.setType(AgentType.DYNAMIC);
             centralAgent.setWebsite("Current website");
             centralAgent.setUserCreate("system");
+            
+            // Inicializar timestamps manualmente (para que funcione en tests mockito)
+            LocalDateTime now = LocalDateTime.now();
+            centralAgent.setCreatedAt(now);
+            centralAgent.setUpdatedAt(now);
+            centralAgent.setIntranet(true);
             agentRepository.persist(centralAgent);
             return AgentResponse.fromEntity(centralAgent);
             

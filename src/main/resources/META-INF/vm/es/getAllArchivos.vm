@@ -3,7 +3,7 @@
   "aggs": {
     "distinct_titles": {
       "terms": {
-        "field": "doc_id",
+        "field": "doc_id.keyword",
         "size": 1000
       },
       "aggs": {
